@@ -15,15 +15,15 @@ product_url_list = []
 for titre in soup.find_all("a", {"href": True, "title": True}, ):
     product_url_list.append((titre['href']).encode('latin1').decode('UTF-8'))
 
-# Formats the abstract URLs into usable ones
-modified_list = []
+# Formats the relative URL into complete path
+full_url_list = []
 for item in product_url_list:
-    modified_list.append(item.replace('../../..', 'https://books.toscrape.com/catalogue'))
+    full_url_list.append(item.replace('../../..', 'https://books.toscrape.com/catalogue'))
 
-# ---------------------------- SCRAPPING LOOP ----------------------------
-# Creating dictionary to translate writen number ratings into numerical later on
+# ------------------------------------- PRE-LOOP VARIABLES -------------------------------------
+# Creating dictionary to translate writen number ratings into numerical one in the loop
 word_to_number = {'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5}
-
+# All the required data to scrap
 product_page_url = []
 universal_product_code = []
 title = []
@@ -34,37 +34,54 @@ product_description = []
 category = []
 review_rating = []
 image_url = []
-
+# Declaring loop iteration variable
 i = 0
-
-while i < len(modified_list):
-
-    page_response = requests.get(modified_list[i])
-
+# ------------------------------------- SCRAPPING LOOP -------------------------------------
+# Loops until all i equals the number of URLs contained in full_url_list
+while i != len(full_url_list):
+    # Get the HTML for the page to scrap in this iteration from the full_url_list
+    page_response = requests.get(full_url_list[i])
+    # Start the soup
     soup = BeautifulSoup(page_response.text, "html.parser")
 
-    product_page_url.append(modified_list[i])
+    # ------------------------------------- Appending data to the different lists -------------------------------------
+    product_page_url.append(full_url_list[i])
+
+    # The UPC code is always in a <td> which has a sibling <th> containing UPC
     universal_product_code.append(soup.find("th", string="UPC").find_next("td").text)
-    title.append(soup.find("h1").text)
+
+    # Encoding and decoding is done to fix a problem with special characters
+    title.append(soup.find("h1").text.encode('latin1').decode('UTF-8'))
+
+    # Same as with UPC, but we only need the numerical value, so we filter out the first 2 characters
     price_including_tax.append(float(soup.find("th", string="Price (incl. tax)").find_next("td").text[2:]))
+
+    # Same as with price including tax just above
     price_excluding_tax.append(float(soup.find("th", string="Price (excl. tax)").find_next("td").text[2:]))
+
+    # Regular expression used to find a series of numbers to obtain the "currently in stock" value
     number_available.append(int(re.search(r'\d+', (soup.find("th", string="Availability")
                                                    .find_next("td").text)).group()))
+
     product_description.append(soup.find("div", id="product_description").find_next("p").text
                                .encode('latin1').decode('UTF-8'))
+
     category.append(soup.find("ul", class_="breadcrumb").find("li").find_next("li").find_next("li").text.strip())
+
     review_rating.append(word_to_number.get
                          ((soup.find("p", class_=re.compile(r'^star-rating ')).get('class'))[1]))
-    image_url.append(soup.find("img", alt=(title[i])).get('src'))
+
+    # the alt content matches the book title, we get the title and extract the href
+    image_url.append((soup.find("img", alt=soup.find("h1").text).get('src'))
+                     .replace('../../', 'https://books.toscrape.com'))
+
+    # Progress indicator
+    print("Scrapped : ", i+1, " / ", len(full_url_list), " pages")
 
     i += 1
+    # ------------------------------------- LOOP END -------------------------------------
 
-print(universal_product_code)
-print(title)
-print(price_including_tax)
-print(price_excluding_tax)
-print(number_available)
-print(product_description)
-print(category)
-print(review_rating)
-print(image_url)
+# Scanning done indicator
+print("Done ", len(full_url_list), " pages scanned")
+
+
