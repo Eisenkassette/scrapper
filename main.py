@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import re
+import csv
 
 main_url = "https://books.toscrape.com/catalogue/category/books/travel_2/index.html"
 
@@ -76,12 +77,22 @@ while i != len(full_url_list):
                      .replace('../../', 'https://books.toscrape.com'))
 
     # Progress indicator
-    print("Scrapped : ", i+1, " / ", len(full_url_list), " pages")
+    print("Scrapped : ", i + 1, " / ", len(full_url_list), " pages")
 
     i += 1
     # ------------------------------------- LOOP END -------------------------------------
 
 # Scanning done indicator
-print("Done ", len(full_url_list), " pages scanned")
+print("Done ", i, " pages scanned")
 
+# ------------------------------------- CSV CREATION -------------------------------------
+# Creating list of headers
+header = ["product_page_url", "universal_product_code", "title", "price_including_tax", "price_excluding_tax",
+          "number_available", "product_description", "category", "review_rating", "image_url"]
 
+# Creating output.csv and populating it
+with open("output.csv", mode="w", newline="") as file:
+    writer = csv.writer(file)
+    writer.writerow(header)
+    writer.writerows(zip(product_page_url, universal_product_code, title, price_including_tax, price_excluding_tax,
+                         number_available, product_description, category, review_rating, image_url))
