@@ -3,7 +3,7 @@ import requests
 import re
 import csv
 
-main_url = "https://books.toscrape.com/catalogue/category/books/travel_2/index.html"
+main_url = "https://books.toscrape.com/catalogue/category/books/classics_6/index.html"
 
 # Get the HTML from the main_url site
 response = requests.get(main_url)
@@ -64,8 +64,12 @@ while i != len(full_url_list):
     number_available.append(int(re.search(r'\d+', (soup.find("th", string="Availability")
                                                    .find_next("td").text)).group()))
 
-    product_description.append(soup.find("div", id="product_description").find_next("p").text
-                               .encode('latin1').decode('UTF-8'))
+    # Checking for the presence of a description, if no description present, print "No Description"
+    description = soup.find("div", id="product_description")
+    if description is not None:
+        product_description.append(description.find_next("p").text.encode('latin1').decode('UTF-8'))
+    else:
+        product_description.append("No Description")
 
     category.append(soup.find("ul", class_="breadcrumb").find("li").find_next("li").find_next("li").text.strip())
 
