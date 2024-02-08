@@ -3,7 +3,22 @@ import requests
 import re
 import csv
 
-main_url = "https://books.toscrape.com/catalogue/category/books/classics_6/index.html"
+
+# Finds all product URLs and formats them
+def find_append_urls():
+    temp_url_list = []
+    # Scraps all URLs that lead to products
+    for titre in soup.find_all("a", {"href": True, "title": True}):
+        temp_url_list.append((titre['href']).encode('latin1').decode('UTF-8'))
+
+    # Formats the relative URL into a complete path
+    for item in temp_url_list:
+        full_url_list.append(item.replace('../../..', 'https://books.toscrape.com/catalogue'))
+
+
+main_url = "https://books.toscrape.com/catalogue/category/books/childrens_11/index.html"
+product_url_list = []
+full_url_list = []
 
 # Get the HTML from the main_url site
 response = requests.get(main_url)
@@ -11,15 +26,16 @@ response = requests.get(main_url)
 # Start the soup
 soup = BeautifulSoup(response.text, "html.parser")
 
-# Scraps all URLs that lead to products
-product_url_list = []
-for titre in soup.find_all("a", {"href": True, "title": True}, ):
-    product_url_list.append((titre['href']).encode('latin1').decode('UTF-8'))
-
-# Formats the relative URL into complete path
-full_url_list = []
-for item in product_url_list:
-    full_url_list.append(item.replace('../../..', 'https://books.toscrape.com/catalogue'))
+# Checks if a next button is present on the page if so scraps the page and adds the next page and runs again,
+# if no next button is present scraps the page and moves on.
+while (soup.find("a", string="next")) is not None:
+    find_append_urls()
+    next_page = soup.find("a", string="next").get('href')
+    next_page = "https://books.toscrape.com/catalogue/category/books/childrens_11/" + next_page
+    response = requests.get(next_page)
+    soup = BeautifulSoup(response.text, "html.parser")
+else:
+    find_append_urls()
 
 # ------------------------------------- PRE-LOOP VARIABLES -------------------------------------
 # Creating dictionary to translate writen number ratings into numerical one in the loop
