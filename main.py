@@ -6,6 +6,7 @@ import csv
 
 # Finds all product URLs and formats them
 def find_append_urls():
+    # To prevent duplication a temp variable is created
     temp_url_list = []
     # Scraps all URLs that lead to products
     for titre in soup.find_all("a", {"href": True, "title": True}):
@@ -16,51 +17,9 @@ def find_append_urls():
         full_url_list.append(item.replace('../../..', 'https://books.toscrape.com/catalogue'))
 
 
-main_url = "https://books.toscrape.com/catalogue/category/books/childrens_11/index.html"
-product_url_list = []
-full_url_list = []
-
-# Get the HTML from the main_url site
-response = requests.get(main_url)
-
-# Start the soup
-soup = BeautifulSoup(response.text, "html.parser")
-
-# Checks if a next button is present on the page if so scraps the page and adds the next page and runs again,
-# if no next button is present scraps the page and moves on.
-while (soup.find("a", string="next")) is not None:
-    find_append_urls()
-    next_page = soup.find("a", string="next").get('href')
-    next_page = "https://books.toscrape.com/catalogue/category/books/childrens_11/" + next_page
-    response = requests.get(next_page)
-    soup = BeautifulSoup(response.text, "html.parser")
-else:
-    find_append_urls()
-
-# ------------------------------------- PRE-LOOP VARIABLES -------------------------------------
-# Creating dictionary to translate writen number ratings into numerical one in the loop
-word_to_number = {'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5}
-# All the required data to scrap
-product_page_url = []
-universal_product_code = []
-title = []
-price_including_tax = []
-price_excluding_tax = []
-number_available = []
-product_description = []
-category = []
-review_rating = []
-image_url = []
-# Declaring loop iteration variable
-i = 0
-# ------------------------------------- SCRAPPING LOOP -------------------------------------
-# Loops until all i equals the number of URLs contained in full_url_list
-while i != len(full_url_list):
-    # Get the HTML for the page to scrap in this iteration from the full_url_list
-    page_response = requests.get(full_url_list[i])
-    # Start the soup
-    soup = BeautifulSoup(page_response.text, "html.parser")
-
+# Appends data to the following lists: "product_page_url", "universal_product_code", "title", "price_including_tax",
+# "price_excluding_tax", "number_available", "product_description", "category", "review_rating", "image_url"
+def append_data():
     # ------------------------------------- Appending data to the different lists -------------------------------------
     product_page_url.append(full_url_list[i])
 
@@ -95,6 +54,57 @@ while i != len(full_url_list):
     # the alt content matches the book title, we get the title and extract the href
     image_url.append((soup.find("img", alt=soup.find("h1").text).get('src'))
                      .replace('../../', 'https://books.toscrape.com'))
+
+
+main_url = "https://books.toscrape.com/catalogue/category/books/childrens_11/index.html"
+
+product_url_list = []
+full_url_list = []
+
+# Get the HTML from the main_url site
+response = requests.get(main_url)
+
+# Start the soup
+soup = BeautifulSoup(response.text, "html.parser")
+
+# Checks if a "next" button is present on the page if so scraps the page and adds the next page and runs again,
+# if no "next" button is present scraps the page and moves on.
+while (soup.find("a", string="next")) is not None:
+    find_append_urls()
+    next_page = soup.find("a", string="next").get('href')
+    next_page = "https://books.toscrape.com/catalogue/category/books/childrens_11/" + next_page
+    response = requests.get(next_page)
+    soup = BeautifulSoup(response.text, "html.parser")
+else:
+    find_append_urls()
+
+# ------------------------------------- PRE-LOOP VARIABLES -------------------------------------
+# Creating dictionary to translate writen number ratings into numerical one in the loop
+word_to_number = {'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5}
+# All the required data to scrap
+product_page_url = []
+universal_product_code = []
+title = []
+price_including_tax = []
+price_excluding_tax = []
+number_available = []
+product_description = []
+category = []
+review_rating = []
+image_url = []
+# Declaring loop iteration variable
+i = 0
+# ------------------------------------- SCRAPPING LOOP -------------------------------------
+# Loops until all i equals the number of URLs contained in full_url_list
+while i != len(full_url_list):
+    # Get the HTML for the page to scrap in this iteration from the full_url_list
+    page_response = requests.get(full_url_list[i])
+
+    # Start the soup
+    soup = BeautifulSoup(page_response.text, "html.parser")
+
+    # Call data finding and appending function
+    append_data()
 
     # Progress indicator
     print("Scrapped : ", i + 1, " / ", len(full_url_list), " pages")
