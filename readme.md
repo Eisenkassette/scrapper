@@ -10,3 +10,4 @@ Taper: ```python3 main.py``` pour lancer le script.
 
 <h3> Resultats </h3>
 Le script créé un dossier nomme "output" dans lequel il génère les listes des informations des produits (format .csv) pour chaque catégorie de livre identifie.
+
