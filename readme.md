@@ -1,4 +1,4 @@
-<h1> Scrappeur pour books.toscrape.com </h1>
+<h2> Scrappeur pour books.toscrape.com </h2>
 Simple script pour exporter les données des produits de books.toscrape.com
 
 <h3> Utilisation </h3>
