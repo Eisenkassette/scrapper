@@ -3,6 +3,7 @@ import requests
 import re
 import csv
 
+
 # Finds all product URLs and formats them
 def find_append_urls():
     # To prevent duplication a temp variable is created
