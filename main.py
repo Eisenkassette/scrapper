@@ -3,6 +3,7 @@ import requests
 import re
 import csv
 
+#test
 
 # Finds all product URLs and formats them
 def find_append_urls():
