@@ -9,5 +9,7 @@ Taper: ```pip install -r requirements.txt``` pour installer les librarie requise
 Taper: ```python3 main.py``` pour lancer le script.
 
 <h3> Resultats </h3>
-Le script créé un dossier nomme "output" dans lequel il génère les listes des informations des produits (format .csv) pour chaque catégorie de livre identifie.
+Le script créé un dossier nommé "output" dans lequel il génère les listes des informations des produits (au format .csv) pour chaque catégorie de livre identifié.
+
+Un dossier nommé images est aussi cree dans output, il contient les images des livres au format .jpg.
 
