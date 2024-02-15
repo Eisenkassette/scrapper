@@ -2,8 +2,7 @@
 Simple script pour exporter les données des produits de books.toscrape.com
 
 <h3> Utilisation </h3>
-Utilisez le terminal pour vous positionner dans le dossier qui contient requirements.txt et main.py.
-
+Utilisez le terminal pour vous positionner dans le dossier qui contient requirements.txt et main.py.<br><br>
 Taper: ```pip install -r requirements.txt``` pour installer les librarie requises.
 
 Taper: ```python3 main.py``` pour lancer le script.
