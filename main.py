@@ -69,7 +69,7 @@ def append_data():
 
     # the alt content matches the book title, we get the title and extract the href
     image_url.append((soup.find("img", alt=soup.find("h1").text).get('src'))
-                     .replace('../../', 'https://books.toscrape.com'))
+                     .replace('../../', 'https://books.toscrape.com/'))
 
 
 # Setting the main page of "books to scrape"
@@ -98,8 +98,9 @@ category = []
 review_rating = []
 image_url = []
 
-# Creating the "output" folder
+# Creating the "output" folder and the "images" folder inside
 os.makedirs("output", exist_ok=True)
+os.makedirs("output/images", exist_ok=True)
 
 # Get the HTML from the main_url site
 response = requests.get(main_url)
@@ -121,7 +122,6 @@ while i < len(href_list):
 # Scrapping loop
 i = 0
 while i < len(full_category_url):
-
     # Taking the active category url to later import for scanning
     url = full_category_url[i]
 
@@ -157,7 +157,7 @@ while i < len(full_category_url):
     # the different lists
     a = 0
     while a != len(full_url_list):
-        # Get the HTML for the page to scrap in this iteration from the full_url_list
+        # Get the HTML for the pages to scrap in this iteration from the full_url_list
         page_response = requests.get(full_url_list[a])
 
         # Start the soup
@@ -171,13 +171,40 @@ while i < len(full_category_url):
 
         a += 1
 
+    # Loop for downloading all images in the "images" folder
+    a = 0
+    while a < len(full_url_list):
+        response = requests.get(image_url[a])
+
+        # Writing the .jpg file, replacing "/" by "-" to prevent conflicts with the writing path
+        with open("output/images/" + title[a].replace("/", "-") + ".jpg", "wb") as file:
+            file.write(response.content)
+
+        # Progress indicator
+        print("Downloading images: ", a+1, " out of ", len(full_url_list), " - ", title[a])
+
+        a += 1
+
+    # Creating the csv file named after the books' category
     with open("output/" + category_title + ".csv", mode="w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(header)
         writer.writerows(zip(product_page_url, universal_product_code, title, price_including_tax, price_excluding_tax,
                              number_available, product_description, category, review_rating, image_url))
 
+    # Resetting all the lists
     full_url_list = []
+
+    product_page_url = []
+    universal_product_code = []
+    title = []
+    price_including_tax = []
+    price_excluding_tax = []
+    number_available = []
+    product_description = []
+    category = []
+    review_rating = []
+    image_url = []
 
     i += 1
 
