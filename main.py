@@ -177,8 +177,12 @@ while i < len(full_category_url):
         response = requests.get(image_url[a])
 
         # Writing the .jpg file, replacing "/" by "-" to prevent conflicts with the writing path
-        with open("output/images/" + title[a].replace("/", "-") + ".jpg", "wb") as file:
-            file.write(response.content)
+        if os.path.exists("output/images/" + title[a].replace("/", "-") + ".jpg"):
+            with open("output/images/" + title[a].replace("/", "-") + "1.jpg", "wb") as file:
+                file.write(response.content)
+        else:
+            with open("output/images/" + title[a].replace("/", "-") + ".jpg", "wb") as file:
+                file.write(response.content)
 
         # Progress indicator
         print("Downloading images: ", a+1, " out of ", len(full_url_list), " - ", title[a])
