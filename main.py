@@ -4,6 +4,9 @@ import re
 import os
 import csv
 
+
+# Obtain all urls to the different categories from scanning the main page
+# noinspection PyShadowingNames
 def get_all_category_url(main_page_url):
     full_category_url = []
     # Get the HTML from the main_url site
@@ -97,7 +100,8 @@ def scrap_data_from_page(product_page_soup):
     # Checking for the presence of a description, if no description present, print "No Description"
     check = product_page_soup.find("div", id="product_description")
     if check is not None:
-        check = product_page_soup.find("div", id="product_description").find_next("p").text.encode('latin1').decode('UTF-8')
+        check = (product_page_soup.find("div", id="product_description").find_next("p").text.encode('latin1')
+                 .decode('UTF-8'))
         if check is not None:
             product_description = check
 
@@ -113,15 +117,14 @@ def scrap_data_from_page(product_page_soup):
         image_url = ((product_page_soup.find("img", alt=product_page_soup.find("h1").text).get('src'))
                      .replace('../../', 'https://books.toscrape.com/'))
 
-
     return (universal_product_code, title, price_including_tax, price_excluding_tax, number_available,
             product_description, review_rating, image_url)
 
 
 # Input a soup parsed category URL
 # Checks if a "next" button is present on the page if so scraps current page for product urls and
-# adds the next page and runs again,
-# if no "next" button is present scraps the current page and moves on.
+# adds the next page and runs again.
+# If no "next" button is present scraps the current page and moves on.
 # Output all product urls of the category in a list
 # noinspection PyShadowingNames
 def get_all_product_url_in_category(category_page_soup, complete_category_url):
@@ -146,6 +149,22 @@ def get_all_product_url_in_category(category_page_soup, complete_category_url):
         all_products_url_list.extend(find_product_urls(category_page_soup))
 
     return all_products_url_list
+
+
+# Function to download the .jpg file, replacing "/" by "-" to prevent conflicts with the writing path.
+# The function also checks if a filename already exist if so it adds a number at the end of the name.
+# noinspection PyShadowingNames
+def download_image(image_name, image_link):
+    if not os.path.exists("output/images/" + image_name.replace("/", "-") + ".jpg"):
+        with open("output/images/" + image_name.replace("/", "-") + ".jpg", "wb") as file:
+            file.write(image_link.content)
+    else:
+        i = 1
+        while os.path.exists("output/images/" + image_name.replace("/", "-") + "(" + str(i) + ").jpg"):
+            i += 1
+        else:
+            with open("output/images/" + image_name.replace("/", "-") + "(" + str(i) + ").jpg", "wb") as file:
+                file.write(image_link.content)
 
 
 # ------------------------------------------------------- Start -------------------------------------------------------
@@ -226,15 +245,11 @@ while i < len(all_category_url):
     # Loop for downloading all images in the "images" folder
     a = 0
     while a < len(all_products_url):
+        # Loading the image
         response = requests.get(image_url[a])
 
-        # Writing the .jpg file, replacing "/" by "-" to prevent conflicts with the writing path
-        if os.path.exists("output/images/" + title[a].replace("/", "-") + ".jpg"):
-            with open("output/images/" + title[a].replace("/", "-") + "(1).jpg", "wb") as file:
-                file.write(response.content)
-        else:
-            with open("output/images/" + title[a].replace("/", "-") + ".jpg", "wb") as file:
-                file.write(response.content)
+        # Downloading the image and calling with current iteration's book's title
+        download_image(title[a], response)
 
         # Progress indicator
         print("Downloading images: ", a + 1, " out of ", len(all_products_url), " - ", title[a])
